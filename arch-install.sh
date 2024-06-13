@@ -256,6 +256,7 @@ setup_services
 if [ -f "/home/$username/post-install.sh" ]; then
     log "Running post install script"
     /home/$username/post-install.sh $username
+    rm /home/$username/post-install.sh
 fi
 
 exit
@@ -263,6 +264,9 @@ EOF
 
 if [ -f "post-install.sh" ]; then
     log "Copying post install script"
+    if [ ! -d "/mnt/home/$username/" ]; then
+        mkdir -p /mnt/home/$username/
+    fi
     cp post-install.sh /mnt/home/$username/post-install.sh
 fi
 
