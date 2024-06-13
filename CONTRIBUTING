@@ -1,0 +1,56 @@
+# Arch Linux Automated Install
+
+First off, thank you for considering contributing to Arch Linux Automated Install. It's people like you that make this project such a great utility for the community.
+
+## Getting Started
+
+Before you begin:
+
+- Ensure you have a basic understanding of the GitHub flow.
+- Read the README and understand the scripts and their functionalities.
+- Check the issues for a list of proposed features (and known issues).
+
+## Reporting Issues
+
+If you find a bug or would like to suggest a new feature, please check if it has already been reported. If it hasn't, open a new issue and provide as much detail as possible:
+
+- Use a clear and descriptive title.
+- Describe the expected behavior and what actually happened.
+- Provide steps to reproduce the bug.
+- Mention the version of the script you're using.
+
+## Making Changes
+
+When you're ready to contribute, follow these steps:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b my-new-feature`.
+3. Make your changes and commit them: `git commit -am 'Add some feature'`.
+4. Push to the branch: `git push origin my-new-feature`.
+5. Submit a pull request.
+
+## Contribution Guidelines
+
+When contributing to this repository, please consider the following:
+
+- **Code Style**: Follow the existing code style as much as possible.
+- **Commit Messages**: Write meaningful commit messages that clearly state the changes you've made.
+- **Documentation**: Update the README.md with details of changes to the interface, if applicable.
+- **Testing**: Add tests for any new features or fixes and ensure that all tests pass.
+
+## Pull Requests
+
+All contributions are made via pull requests. Here's what you can expect after submitting one:
+
+- The project maintainers will review your work, suggest changes, or merge it.
+- If your pull request is not accepted, don't be discouraged. New ideas are always appreciated.
+
+## Code of Conduct
+
+By participating, you are expected to uphold this code. Please report unacceptable behavior to hello@murilopereira.dev.
+
+## License
+
+By contributing to this project, you agree that your contributions will be licensed under its AGPLv3 License.
+
+Thank you for contributing!

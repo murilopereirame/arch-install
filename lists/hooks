@@ -1,0 +1,12 @@
+base
+udev
+autodetect
+modconf
+block
+plymouth
+encrypt
+lvm2
+filesystems
+keyboard
+resume
+fsck

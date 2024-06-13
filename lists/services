@@ -1,0 +1,5 @@
+NetworkManager
+sddm
+cups
+bluetooth.service
+docker.socket
