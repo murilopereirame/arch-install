@@ -215,48 +215,48 @@ install_aur_packages () {
 }
 
 log 'Configuring pacman...'
-configure_pacman
+log \$(configure_pacman 2>&1)
 
 log 'Installing packages...'
-install_packages
+log \$(install_packages 2>&1)
 
 log 'Installing KDE Plasma...'
-install_kde
+log \$(install_kde 2>&1)
 
 log 'Setting up Plymouth...'
-setup_plymouth
+log \$(setup_plymouth 2>&1)
 
 log 'Setting up Time Zone...'
-adjust_clock
+log \$(adjust_clock 2>&1)
 
 log 'Setting up locale...'
-setup_locale
+log \$(setup_locale 2>&1)
 
 log 'Setting up user...'
-setup_users
+log \$(setup_users 2>&1)
 
 log 'Installing yay...'
-install_yay
+log \$(install_yay 2>&1)
 
 log 'Generating Initramfs...'
-setup_mkinitcpio
+log \$(setup_mkinitcpio 2>&1)
 
 log 'Installing GRUB...'
-setup_grub
+log \$(setup_grub 2>&1)
 
 log 'Installing AUR packages...'
-install_aur_packages
+log \$(install_aur_packages 2>&1)
 
 log 'Updating Shell...'
-setup_shell
+log \$(setup_shell 2>&1)
 
 log 'Setting up services...'
-setup_services
+log \$(setup_services 2>&1)
 
-if [ -f "/home/$username/post-install.sh" ]; then
+if [ -f "/root/post-install.sh" ]; then
     log "Running post install script"
-    /home/$username/post-install.sh $username
-    rm /home/$username/post-install.sh
+    /root/post-install.sh $username
+    rm /root/post-install.sh
 fi
 
 exit
@@ -264,10 +264,7 @@ EOF
 
 if [ -f "post-install.sh" ]; then
     log "Copying post install script"
-    if [ ! -d "/mnt/home/$username/" ]; then
-        mkdir -p /mnt/home/$username/
-    fi
-    cp post-install.sh /mnt/home/$username/post-install.sh
+    cp post-install.sh /mnt/root/post-install.sh
 fi
 
 chmod +x /mnt/root/arch-install.sh

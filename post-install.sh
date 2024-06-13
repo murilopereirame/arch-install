@@ -1,9 +1,9 @@
 #!/bin/bash
 
-$USER=$1
+USERNAME=$1
 
 # WARNING: This file will be executed as root.
-cat <<EOF >> /home/$USER/.zshrc
+cat <<EOF >> /home/$USERNAME/.zshrc
 
 # Add nvm to profile
 [ -z "\$NVM_DIR" ] && export NVM_DIR="\$HOME/.nvm"
@@ -20,4 +20,4 @@ EOF
 
 # Setup Docker permissions
 groupadd docker
-usermod -aG docker $USER
+usermod -aG docker $USERNAME
