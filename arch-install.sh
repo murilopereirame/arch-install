@@ -106,7 +106,7 @@ log () {
             output="\$output \$message"
         done
     else
-        if [ "\$@" -gt 0 ]; then
+        if [ "\$#" -gt 0 ]; then
             if [ -n "\$1" ]; then
                 output=\$1
             fi
