@@ -88,3 +88,4 @@ hostname=""
 efi_size="100M"
 boot_size="512M"
 home_size="100G"
+enable_encrypt=false

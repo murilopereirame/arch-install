@@ -26,7 +26,8 @@ log () {
         echo -e "${BYellow}[$date_time]${RESET} $output"
     fi
     
-    if [ $status -ne 0 ]; then
+    if [ $status -gt 1 ]; then
+        echo -e "${BYellow}[$date_time]${RESET} Command failed. Exiting with code $status"
         exit $?
     fi
 }
@@ -83,19 +84,21 @@ load_modules () {
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
-    echo " -h, --help      		Display this help message"
-    echo " -v, --verbose   		Enable verbose mode"
-    echo " -S, --ssid      		WiFi SSID to connect"
-    echo " -P, --passphrase   	WiFi Passphrase"
-    echo " -I, --interface     WiFi interface (default: wlan0)"
-    echo " -W, --wifi     			Connects to WiFi network"
-    echo " -D, --disk					Disk to install Arch into"
-    echo " -L, --luks-password	Disk encryption Password"
-    echo " -R, --reboot				Reboot when install script finishes"
-    echo " -T, --time					Sets system TimeZone"
-    echo " -U, --username			Sets system Username"
-    echo " -p, --password			Sets User and Root password"
-    echo " -H, --hostname			Sets system Hostname"
+    echo " -h, --help      		        Display this help message"
+    echo " -v, --verbose   		        Enable verbose mode"
+    echo " -S, --ssid      		        WiFi SSID to connect"
+    echo " -P, --passphrase   	        WiFi Passphrase"
+    echo " -I, --interface              WiFi interface (default: wlan0)"
+    echo " -W, --wifi     			    Connects to WiFi network"
+    echo " -D, --disk				    Disk to install Arch into"
+    echo " -E, --encrypt                Enables disk encryption"
+    echo " -L, --luks-password	        Disk encryption Password"
+    echo " -R, --reboot				    Reboot when install script finishes"
+    echo " -T, --time				    Sets system TimeZone"
+    echo " -U, --username			    Sets system Username"
+    echo " -p, --password			    Sets User and Root password"
+    echo " -H, --hostname			    Sets system Hostname"
+    echo " -e, --desktop-environment    Sets system Hostname"
 }
 
 handle_options() {
@@ -127,6 +130,10 @@ handle_options() {
                 disk=$(extract_argument $@)
                 shift
             ;;
+            -E | --encrypt)
+                enable_encrypt=true
+                shift
+            ;;
             -L | --luks-password)
                 luks_password=$(extract_argument $@)
                 shift
@@ -148,6 +155,10 @@ handle_options() {
             ;;
             -H | --hostname)
                 hostname=$(extract_argument $@)
+                shift
+            ;;
+            -e | --desktop-environment*)
+                desktop_environment=$(extract_argument $@)
                 shift
             ;;
             *)

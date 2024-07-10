@@ -56,24 +56,40 @@ EOF
     log "Making BOOT partition at /dev/$BOOT_PARTITION"
     log $(echo "y" | mkfs.ext4 /dev/$BOOT_PARTITION 2>&1)
     
-    log "Creating LUKS partition at /dev/${ROOT_PARTITION}"
-    log $(echo -n $luks_password | cryptsetup --use-random luksFormat "/dev/${ROOT_PARTITION}" 2>&1 )
-    log $(echo -n $luks_password | cryptsetup luksOpen "/dev/${ROOT_PARTITION}" cryptlvm 2>&1)
+    if [ "$enable_encrypt" = true ]; then
+        log "Creating LUKS partition at /dev/${ROOT_PARTITION}"
+        log $(echo -n $luks_password | cryptsetup --use-random luksFormat "/dev/${ROOT_PARTITION}" 2>&1 )
+        log $(echo -n $luks_password | cryptsetup luksOpen "/dev/${ROOT_PARTITION}" cryptlvm 2>&1)
+        
+        log $(pvcreate /dev/mapper/cryptlvm 2>&1)
+        log $(vgcreate vg0 /dev/mapper/cryptlvm 2>&1)
+        
+        log $(lvcreate --size $home_size vg0 --name root 2>&1)
+        log $(lvcreate -l +100%FREE vg0 --name home 2>&1)
+        log $(lvreduce --size -256M vg0/home 2>&1)
+        
+        log $(echo "y" | mkfs.ext4 /dev/vg0/root 2>&1)
+        log $(echo "y" | mkfs.ext4 /dev/vg0/home 2>&1)
+        
+        log $(mount /dev/vg0/root /mnt 2>&1)
+    else
+        
+        log "Making BOOT partition at /dev/$ROOT_PARTITION"
+        log $(echo "y" | mkfs.ext4 /dev/$ROOT_PARTITION 2>&1)
+        
+        log "Mounting /dev/${ROOT_PARTITION}"
+        log $(mount --mkdir "/dev/${ROOT_PARTITION}" /mnt 2>&1)
+    fi
     
-    log $(pvcreate /dev/mapper/cryptlvm 2>&1)
-    log $(vgcreate vg0 /dev/mapper/cryptlvm 2>&1)
-    
-    log $(lvcreate --size $home_size vg0 --name root 2>&1)
-    log $(lvcreate -l +100%FREE vg0 --name home 2>&1)
-    log $(lvreduce --size -256M vg0/home 2>&1)
-    
-    log $(echo "y" | mkfs.ext4 /dev/vg0/root 2>&1)
-    log $(echo "y" | mkfs.ext4 /dev/vg0/home 2>&1)
-    
-    log $(mount /dev/vg0/root /mnt 2>&1)
+    log "Mounting /dev/${EFI_PARTITION}"
     log $(mount --mkdir "/dev/${EFI_PARTITION}" /mnt/efi 2>&1)
+    
+    log "Mounting /dev/${BOOT_PARTITION}"
     log $(mount --mkdir "/dev/${BOOT_PARTITION}" /mnt/boot 2>&1)
-    log $(mount --mkdir /dev/vg0/home /mnt/home 2>&1)
+    
+    if [ "$enable_encrypt" = true ]; then
+        log $(mount --mkdir /dev/vg0/home /mnt/home 2>&1)
+    fi
     
     log "Disk partitioned!"
     log "EFI set at ${EFI_PARTITION}"
@@ -144,6 +160,11 @@ install_kde () {
 		spectacle yakuake
 }
 
+install_gnome () {
+	pacman --noconfirm -S gnome
+}
+
+
 setup_plymouth () {
 	git clone https://github.com/murkl/plymouth-theme-arch-os.git
 	cd plymouth-theme-arch-os && cp -r ./src /usr/share/plymouth/themes/arch-os
@@ -187,9 +208,11 @@ setup_mkinitcpio () {
 setup_grub () {
 	grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
 
-	sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cryptdevice=\/dev\/${ROOT_PARTITION}:cryptlvm root=\/dev\/vg0\/root quiet splash ibt=off"/' /etc/default/grub
-	echo "GRUB_ENABLE_CRYPTODISK=y" >> /etc/default/grub
-	grub-mkconfig -o /boot/grub/grub.cfg
+    if [ "$enable_encrypt" = true ]; then
+        sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cryptdevice=\/dev\/${ROOT_PARTITION}:cryptlvm root=\/dev\/vg0\/root quiet splash ibt=off"/' /etc/default/grub
+	    echo "GRUB_ENABLE_CRYPTODISK=y" >> /etc/default/grub
+	    grub-mkconfig -o /boot/grub/grub.cfg
+    fi
 }
 
 setup_shell () {
@@ -204,14 +227,17 @@ setup_services () {
 }
 
 install_aur_packages () {
-    packages=($(load_aur_packages))
-    for package in "\${packages[@]}"; do
-        git clone \$package package
-        cd package
-        mkpkg -si --noconfirm
-        cd ..
-        rm -rf package
-    done
+    su $username <<'COMMAND'
+cd /home/$username/
+packages=($(load_aur_packages))
+for package in "\${packages[@]}"; do
+    git clone \$package package
+    cd package
+    makepkg -si --noconfirm
+    cd ..
+    rm -rf package
+done
+COMMAND
 }
 
 log 'Configuring pacman...'
@@ -220,8 +246,15 @@ log \$(configure_pacman 2>&1)
 log 'Installing packages...'
 log \$(install_packages 2>&1)
 
-log 'Installing KDE Plasma...'
-log \$(install_kde 2>&1)
+if [ "$desktop_environment" = "kde" ]; then
+    log 'Installing KDE Plasma...'
+    log \$(install_kde 2>&1)
+elif [ "$desktop_environment" = "gnome" ]; then
+    log 'Installing Gnome...'
+    log \$(install_gnome 2>&1)
+else
+    log 'No Desktop Envirionment defined. Continuing without it...'
+fi
 
 log 'Setting up Plymouth...'
 log \$(setup_plymouth 2>&1)
