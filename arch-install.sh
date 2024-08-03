@@ -158,12 +158,18 @@ install_kde () {
 		kmousetool knotes kolourpaint kompare krdc krfb ksystemlog \\
 		kwalletmanager okular partitionmanager markdownpart svgpart \\
 		spectacle yakuake
+
+    systemctl enable sddm
 }
 
 install_gnome () {
 	pacman --noconfirm -S gnome
 }
 
+install_cinnamon () {
+    pacman --noconfirm -S cinnamon lightdm lightdm-gtk-greeter lightdm-slick-greeter xed xreader xreader
+    systemctl enable lightdm
+}
 
 setup_plymouth () {
 	git clone https://github.com/murkl/plymouth-theme-arch-os.git
@@ -252,6 +258,9 @@ if [ "$desktop_environment" = "kde" ]; then
 elif [ "$desktop_environment" = "gnome" ]; then
     log 'Installing Gnome...'
     log \$(install_gnome 2>&1)
+elif [ "$desktop_environment" = "cinnamon" ]; then
+    log 'Installing Cinnamon...'
+    log \$(install_cinnamon 2>&1)
 else
     log 'No Desktop Envirionment defined. Continuing without it...'
 fi
